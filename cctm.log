@@ -1,0 +1,1549 @@
+Compiler is set to intel
+
+model       CCTM_v521.exe;
+
+repo        /scratch/brown/fang63/CMAQ-5.2.1/src/CCTM/src;
+
+mechanism   cb6r3_ae6_aq;
+
+lib_base    /scratch/brown/fang63/CMAQ-5.2.1/lib/x86_64/intel;
+
+lib_1       ioapi/modules;
+
+lib_2       ioapi/include_files;
+
+lib_3       "mpi -I.";
+
+
+lib_4       ioapi/lib;
+
+cpp_flags   " -Dparallel  -DSUBST_BARRIER=SE_BARRIER -DSUBST_GLOBAL_MAX=SE_GLOBAL_MAX -DSUBST_GLOBAL_MIN=SE_GLOBAL_MIN -DSUBST_GLOBAL_MIN_DATA=SE_GLOBAL_MIN_DATA -DSUBST_GLOBAL_TO_LOCAL_COORD=SE_GLOBAL_TO_LOCAL_COORD -DSUBST_GLOBAL_SUM=SE_GLOBAL_SUM -DSUBST_GLOBAL_LOGICAL=SE_GLOBAL_LOGICAL -DSUBST_LOOP_INDEX=SE_LOOP_INDEX -DSUBST_SUBGRID_INDEX=SE_SUBGRID_INDEX -DSUBST_HI_LO_BND_PE=SE_HI_LO_BND_PE -DSUBST_SUM_CHK=SE_SUM_CHK -DSUBST_INIT_ARRAY=SE_INIT_ARRAY -DSUBST_COMM=SE_COMM -DSUBST_MY_REGION=SE_MY_REGION -DSUBST_SLICE=SE_SLICE -DSUBST_GATHER=SE_GATHER -DSUBST_DATA_COPY=SE_DATA_COPY -DSUBST_IN_SYN=SE_IN_SYN";
+
+f_compiler  mpiifort;
+
+fstd        "-O3 -fno-alias -mp1 -fp-model source";
+
+dbg         "-O0 -g -check bounds -check uninit -fpe0 -fno-alias -ftrapuv -traceback";
+
+f_flags     "-fixed -132";
+
+f90_flags   "-free";
+
+c_compiler  icc;
+
+c_flags     "-O2 -DFLDMN -I";
+
+link_flags  "-static_mpi";
+
+ioapi       "-lioapi -Bstatic -liomp5 -Bdynamic";     
+
+netcdf      "-lnetcdff -lnetcdf";
+
+mpich       " -lcurl";
+
+include SUBST_PE_COMM    ./PE_COMM.EXT;
+include SUBST_CONST      ./CONST.EXT;
+include SUBST_FILES_ID   ./FILES_CTM.EXT;
+include SUBST_EMISPRM    ./EMISPRM.EXT;
+
+// Parallel / Include message passing definitions
+include SUBST_MPI        ./mpif.h;
+
+// options are stenex or se_noop
+Module STENEX/se;
+// parallel executable; stenex and pario included
+Module PARIO;
+
+// options are par, par_nodistr and par_noop
+Module par/mpi;
+
+// options are wrf and yamo
+Module driver/wrf;
+
+// options are cartesian
+Module grid/cartesian;
+
+// options are yamo
+Module init/yamo;
+
+// options are gencoor_wrf and gencoor
+Module couple/gencoor_wrf;
+
+// options are yamo
+Module hadv/yamo;
+
+// options are wrf and yamo
+Module vadv/wrf;
+
+// options are multiscale
+Module hdiff/multiscale;
+
+// options are acm2
+Module vdiff/acm2;
+
+// options are m3dry
+Module depv/m3dry;
+
+// options are emis
+Module emis/emis;
+
+// options are beis3
+Module biog/beis3;
+
+// options are smoke
+Module plrise/smoke;
+
+// options are cgrid_spcs_nml and cgrid_spcs_icl
+Module spcs/cgrid_spcs_nml;
+
+// options are inline and table
+Module phot/inline;
+
+//  gas chemistry solvers
+// options are smvgear, ros3, and ebi_<mech>; see 'gas chemistry mechanisms' for <mech>
+Module gas/ebi_cb6r3_ae6_aq;
+
+//  gas chemistry mechanisms
+// options are cb05e51_ae6_aq, cb05e51_ae6nvPOA_aq, cb05eh51_ae6_aq, cb05mp51_ae6_aq, cb05tucl_ae6_aq, cb05tump_ae6_aq, cb6r3_ae6_aq, cb6r3_ae6nvPOA_aq, racm2_ae6_aq, saprc07tb_ae6_aq, saprc07tc_ae6_aq, saprc07tc_ae6nvPOA_aq, saprc07tic_ae6i_aq, saprc07tic_ae6i_aqkmti, saprc07tic_ae6invPOA_aq
+Module MECHS/cb6r3_ae6_aq;
+
+//  tracer modules
+// options are trac0, trac1
+Module MECHS/trac0;
+// options are aero6
+Module aero/aero6;
+
+// options are acm_ae6, acm_ae6_kmt, and acm_ae6_mp
+Module cloud/acm_ae6;
+
+// compile for inline process analysis
+Module procan/pa;
+
+// options are util
+Module util/util;
+
+    
+setenv WORKDIR /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts
+setenv OUTDIR /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713
+setenv INPDIR /scratch/brown/fang63/CMAQ-5.2.1/data
+setenv LOGDIR /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/LOGS
+setenv NMLpath /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel
+setenv NEW_START TRUE
+set START_DATE = 2016-07-13
+set END_DATE = 2016-07-13
+set STTIME = 000000
+set NSTEPS = 240000
+set TSTEP = 010000
+if ( mpi == serial ) then
+@ NPCOL = 4
+@ NPROW = 2
+@ NPROCS = 4 * 2
+setenv NPCOL_NPROW 4 2
+endif
+set NZ = 30
+setenv GRID_NAME SE52BENCH
+setenv GRIDDESC /scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/GRIDDESC
+setenv AVG_CONC_SPCS ALL
+setenv ACONC_BLEV_ELEV  1 1
+setenv AVG_FILE_ENDTIME N
+setenv EXECUTION_ID CCTM_v521.exe
+setenv CTM_MAXSYNC 300
+setenv CTM_MINSYNC 60
+setenv SIGMA_SYNC_TOP 0.7
+setenv CTM_ADV_CFL 0.95
+setenv CTM_WB_DUST N
+setenv CTM_ERODE_AGLAND Y
+setenv CTM_WBDUST_BELD BELD3
+setenv CTM_LTNG_NO N
+setenv CTM_WVEL N
+setenv KZMIN N
+setenv CTM_ILDEPV Y
+setenv CTM_MOSAIC N
+setenv CTM_FST N
+setenv CTM_ABFLUX N
+setenv CTM_HGBIDI N
+setenv CTM_SFC_HONO Y
+setenv CTM_GRAV_SETL N
+setenv CTM_BIOGEMIS N
+setenv CTM_PT3DEMIS N
+setenv CTM_ZERO_PCSOA N
+setenv CTM_PROCAN N
+setenv PA_BCOL_ECOL 10 320
+setenv PA_BROW_EROW 10 195
+setenv PA_BLEV_ELEV 1  4
+setenv IOAPI_LOG_WRITE F
+setenv FL_ERR_STOP N
+setenv PROMPTFLAG F
+setenv IOAPI_OFFSET_64 NO
+setenv CTM_EMISCHK N
+setenv CTM_AVISDIAG Y
+setenv CTM_PMDIAG Y
+setenv CTM_APMDIAG Y
+setenv APMDIAG_BLEV_ELEV 1 3
+setenv APMDIAG_BLEV_ELEV 
+setenv CTM_CKSUM Y
+setenv CLD_DIAG Y
+setenv CTM_AERDIAG Y
+setenv CTM_PHOTDIAG Y
+setenv CTM_SSEMDIAG N
+setenv CTM_DUSTEM_DIAG Y
+setenv CTM_DEPV_FILE N
+setenv VDIFF_DIAG_FILE Y
+setenv LTNGDIAG N
+setenv CTM_AOD Y
+setenv B3GTS_DIAG Y
+setenv PT3DDIAG N
+setenv PT3DFRAC N
+setenv REP_LAYER_MIN -1
+set DISP = delete
+set ICpath = /scratch/brown/fang63/CMAQ-5.2.1/data/icon
+set BCpath = /scratch/brown/fang63/CMAQ-5.2.1/data/bcon
+set EMISpath = /scratch/brown/fang63/CMAQ-5.2.1/data/emis/gridded_area
+set IN_PTpath = /scratch/brown/fang63/CMAQ-5.2.1/data/emis/inln_point
+set IN_LTpath = /scratch/brown/fang63/CMAQ-5.2.1/data/lightning
+set METpath = /scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713
+set OMIpath = /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel
+set LUpath = /scratch/brown/fang63/CMAQ-5.2.1/data/met/wrf
+set SZpath = /scratch/brown/fang63/CMAQ-5.2.1/data/ocean
+set ICBC_CASE = 2013ef_v6_13g_s07
+set EMIS_CASE = 2013ef_v6_13g_s07_hg
+set TODAYG = 2016-07-13
+set TODAYJ = `date -ud "${START_DATE}" +%Y%j`
+date -ud 2016-07-13 +%Y%j
+set STOP_DAY = `date -ud "${END_DATE}" +%Y%j`
+date -ud 2016-07-13 +%Y%j
+while ( 2016195 < = 2016195 )
+set YYYYMMDD = `date -ud "${TODAYG}" +%Y%m%d`
+date -ud 2016-07-13 +%Y%m%d
+set YYMMDD = `date -ud "${TODAYG}" +%y%m%d`
+date -ud 2016-07-13 +%y%m%d
+set YYYYJJJ = 2016195
+set YESTERDAY = `date -ud "${TODAYG}-1days" +%Y%m%d`
+date -ud 2016-07-13-1days +%Y%m%d
+if ( TRUE == true || TRUE == TRUE ) then
+setenv ICFILE ICON_v52_160713_profile
+setenv INITIAL_RUN Y
+rm -rf /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/LOGS/CTM_LOG_001.v521_intel_160713_20160713 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/LOGS/CTM_LOG_002.v521_intel_160713_20160713 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/LOGS/CTM_LOG_003.v521_intel_160713_20160713 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/LOGS/CTM_LOG_004.v521_intel_160713_20160713 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/LOGS/CTM_LOG_005.v521_intel_160713_20160713 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/LOGS/CTM_LOG_006.v521_intel_160713_20160713 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/LOGS/CTM_LOG_007.v521_intel_160713_20160713
+mkdir -p /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713
+else
+set BCFILE = BCON_v52_160713_profile
+set OMIfile = OMI_1979_to_2015.dat
+set OPTfile = PHOT_OPTICS.dat
+setenv GRID_BDY_2D /scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/GRIDBDY2D_160713.nc
+setenv GRID_CRO_2D /scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/GRIDCRO2D_160713.nc
+setenv GRID_CRO_3D /scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/GRIDCRO3D_160713.nc
+setenv GRID_DOT_2D /scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/GRIDDOT2D_160713.nc
+setenv MET_CRO_2D /scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/METCRO2D_160713.nc
+setenv MET_CRO_3D /scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/METCRO3D_160713.nc
+setenv MET_DOT_3D /scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/METDOT3D_160713.nc
+setenv MET_BDY_3D /scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/METBDY3D_160713.nc
+setenv LAYER_FILE /scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/METCRO3D_160713.nc
+if ( N == N ) then
+set EMISfile = emis_mole_all_20160713.nc
+else
+if ( N == Y ) then
+if ( N == Y ) then
+if ( N == Y ) then
+setenv OCEAN_1 /scratch/brown/fang63/CMAQ-5.2.1/data/ocean/ocean_file.dummy.SE52BENCH.ncf
+if ( N == Y ) then
+setenv CTM_APPL v521_intel_160713_20160713
+setenv S_CGRID /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CGRID_v521_intel_160713_20160713.nc
+setenv CTM_CONC_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CONC_v521_intel_160713_20160713.nc -v
+setenv A_CONC_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_ACONC_v521_intel_160713_20160713.nc -v
+setenv MEDIA_CONC /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_MEDIA_CONC_v521_intel_160713_20160713.nc -v
+setenv CTM_DRY_DEP_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DRYDEP_v521_intel_160713_20160713.nc -v
+setenv CTM_DEPV_DIAG /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPV_v521_intel_160713_20160713.nc -v
+setenv CTM_PT3D_DIAG /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PT3D_v521_intel_160713_20160713.nc -v
+setenv B3GTS_S /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_B3GTS_S_v521_intel_160713_20160713.nc -v
+setenv SOILOUT /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_SOILOUT_v521_intel_160713_20160713.nc
+setenv CTM_WET_DEP_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP1_v521_intel_160713_20160713.nc -v
+setenv CTM_WET_DEP_2 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP2_v521_intel_160713_20160713.nc -v
+setenv CTM_VIS_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PMVIS_v521_intel_160713_20160713.nc -v
+setenv CTM_AVIS_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_APMVIS_v521_intel_160713_20160713.nc -v
+setenv CTM_PMDIAG_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PMDIAG_v521_intel_160713_20160713.nc -v
+setenv CTM_APMDIAG_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_APMDIAG_v521_intel_160713_20160713.nc -v
+setenv CTM_RJ_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PHOTDIAG1_v521_intel_160713_20160713.nc -v
+setenv CTM_RJ_2 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PHOTDIAG2_v521_intel_160713_20160713.nc -v
+setenv CTM_SSEMIS_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_SSEMIS_v521_intel_160713_20160713.nc -v
+setenv CTM_DUST_EMIS_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DUSTEMIS_v521_intel_160713_20160713.nc -v
+setenv CTM_IPR_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_1_v521_intel_160713_20160713.nc -v
+setenv CTM_IPR_2 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_2_v521_intel_160713_20160713.nc -v
+setenv CTM_IPR_3 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_3_v521_intel_160713_20160713.nc -v
+setenv CTM_IRR_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_1_v521_intel_160713_20160713.nc -v
+setenv CTM_IRR_2 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_2_v521_intel_160713_20160713.nc -v
+setenv CTM_IRR_3 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_3_v521_intel_160713_20160713.nc -v
+setenv CTM_DRY_DEP_MOS /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DDMOS_v521_intel_160713_20160713.nc -v
+setenv CTM_DRY_DEP_FST /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DDFST_v521_intel_160713_20160713.nc -v
+setenv CTM_DEPV_MOS /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPVFST_v521_intel_160713_20160713.nc -v
+setenv CTM_DEPV_FST /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPVMOS_v521_intel_160713_20160713.nc -v
+setenv CTM_VDIFF_DIAG /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_VDIFF_DIAG_v521_intel_160713_20160713.nc -v
+setenv CTM_VSED_DIAG /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_VSED_DIAG_v521_intel_160713_20160713.nc -v
+setenv CTM_AOD_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_AOD_DIAG_v521_intel_160713_20160713.nc -v
+setenv CTM_LTNGDIAG_1 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_LTNGHRLY_v521_intel_160713_20160713.nc -v
+setenv CTM_LTNGDIAG_2 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_LTNGCOL_v521_intel_160713_20160713.nc -v
+setenv FLOOR_FILE /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/FLOOR_v521_intel_160713_20160713.txt
+if ( ! -d /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713 ) mkdir -p /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713
+set log_test = `ls CTM_LOG_???.${CTM_APPL}`
+ls: No match.
+set OUT_FILES = ( /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/FLOOR_v521_intel_160713_20160713.txt /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CGRID_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CONC_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_ACONC_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_MEDIA_CONC_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DRYDEP_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPV_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PT3D_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_B3GTS_S_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_SOILOUT_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP1_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP2_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PMVIS_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_APMVIS_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PMDIAG_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_APMDIAG_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PHOTDIAG1_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PHOTDIAG2_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_SSEMIS_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DUSTEMIS_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_1_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_2_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_3_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_1_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_2_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_3_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DDMOS_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DDFST_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPVFST_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPVMOS_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_VDIFF_DIAG_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_VSED_DIAG_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_AOD_DIAG_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_LTNGHRLY_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_LTNGCOL_v521_intel_160713_20160713.nc -v )
+set OUT_FILES = `echo $OUT_FILES | sed "s; -v;;g" `
+echo /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/FLOOR_v521_intel_160713_20160713.txt /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CGRID_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CONC_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_ACONC_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_MEDIA_CONC_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DRYDEP_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPV_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PT3D_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_B3GTS_S_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_SOILOUT_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP1_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP2_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PMVIS_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_APMVIS_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PMDIAG_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_APMDIAG_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PHOTDIAG1_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PHOTDIAG2_v521_intel_160713_20160713.nc -v /scratcsed s; -v;;g
+h/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_SSEMIS_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DUSTEMIS_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_1_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_2_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_3_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_1_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_2_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_3_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DDMOS_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DDFST_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPVFST_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPVMOS_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_VDIFF_DIAG_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_VSED_DIAG_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_AOD_DIAG_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_LTNGHRLY_v521_intel_160713_20160713.nc -v /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_LTNGCOL_v521_intel_160713_20160713.nc -v
+echo /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/FLOOR_v521_intel_160713_20160713.txt /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CGRID_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CONC_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_ACONC_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_MEDIA_CONC_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DRYDEP_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPV_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PT3D_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_B3GTS_S_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_SOILOUT_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP1_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP2_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PMVIS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_APMVIS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PMDIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_APMDIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PHOTDIAG1_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PHOTDIAG2_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_SSEMIS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DUSTEMIS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_1_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_2_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_3_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_1_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_2_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_3_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DDMOS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DDFST_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPVFST_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPVMOS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_VDIFF_DIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_VSED_DIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_AOD_DIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_LTNGHRLY_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_LTNGCOL_v521_intel_160713_20160713.nc
+/scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/FLOOR_v521_intel_160713_20160713.txt /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CGRID_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CONC_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_ACONC_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_MEDIA_CONC_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DRYDEP_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPV_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PT3D_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_B3GTS_S_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_SOILOUT_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP1_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP2_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PMVIS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_APMVIS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PMDIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_APMDIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PHOTDIAG1_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PHOTDIAG2_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_SSEMIS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DUSTEMIS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_1_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_2_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_3_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_1_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_2_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_3_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DDMOS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DDFST_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPVFST_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPVMOS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_VDIFF_DIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_VSED_DIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_AOD_DIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_LTNGHRLY_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_LTNGCOL_v521_intel_160713_20160713.nc
+set out_test = `ls $OUT_FILES`
+ls /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/FLOOR_v521_intel_160713_20160713.txt /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CGRID_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CONC_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_ACONC_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_MEDIA_CONC_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DRYDEP_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPV_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PT3D_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_B3GTS_S_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_SOILOUT_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP1_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP2_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PMVIS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_APMVIS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PMDIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_APMDIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PHOTDIAG1_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PHOTDIAG2_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_SSEMIS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DUSTEMIS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_1_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_2_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_3_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_1_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_2_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_3_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DDMOS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DDFST_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPVFST_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPVMOS_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_VDIFF_DIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_VSED_DIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_AOD_DIAG_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_LTNGHRLY_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_LTNGCOL_v521_intel_160713_20160713.nc
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/FLOOR_v521_intel_160713_20160713.txt: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CGRID_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_MEDIA_CONC_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DRYDEP_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPV_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PT3D_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_B3GTS_S_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_SOILOUT_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PMVIS_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_APMVIS_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PMDIAG_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_APMDIAG_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PHOTDIAG1_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PHOTDIAG2_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_SSEMIS_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DUSTEMIS_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_1_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_2_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_PA_3_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_1_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_2_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_IRR_3_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DDMOS_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DDFST_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPVFST_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_DEPVMOS_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_VDIFF_DIAG_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_VSED_DIAG_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_AOD_DIAG_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_LTNGHRLY_v521_intel_160713_20160713.nc: No such file or directory
+ls: cannot access /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_LTNGCOL_v521_intel_160713_20160713.nc: No such file or directory
+if ( delete == delete ) then
+echo  ancillary log files being deleted
+ ancillary log files being deleted
+foreach file ( )
+echo  output files being deleted
+ output files being deleted
+foreach file ( /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_ACONC_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CONC_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP1_v521_intel_160713_20160713.nc /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP2_v521_intel_160713_20160713.nc )
+echo  deleting /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_ACONC_v521_intel_160713_20160713.nc
+ deleting /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_ACONC_v521_intel_160713_20160713.nc
+/bin/rm -f /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_ACONC_v521_intel_160713_20160713.nc
+end
+echo  deleting /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CONC_v521_intel_160713_20160713.nc
+ deleting /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CONC_v521_intel_160713_20160713.nc
+/bin/rm -f /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CONC_v521_intel_160713_20160713.nc
+end
+echo  deleting /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP1_v521_intel_160713_20160713.nc
+ deleting /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP1_v521_intel_160713_20160713.nc
+/bin/rm -f /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP1_v521_intel_160713_20160713.nc
+end
+echo  deleting /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP2_v521_intel_160713_20160713.nc
+ deleting /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP2_v521_intel_160713_20160713.nc
+/bin/rm -f /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP2_v521_intel_160713_20160713.nc
+end
+else
+setenv CTM_STDATE 2016195
+setenv CTM_STTIME 000000
+setenv CTM_RUNLEN 240000
+setenv CTM_TSTEP 010000
+setenv EMIS_1 /scratch/brown/fang63/CMAQ-5.2.1/data/emis/gridded_area/emis_mole_all_20160713.nc
+setenv INIT_GASC_1 /scratch/brown/fang63/CMAQ-5.2.1/data/icon/ICON_v52_160713_profile
+setenv INIT_AERO_1 /scratch/brown/fang63/CMAQ-5.2.1/data/icon/ICON_v52_160713_profile
+setenv INIT_NONR_1 /scratch/brown/fang63/CMAQ-5.2.1/data/icon/ICON_v52_160713_profile
+setenv INIT_TRAC_1 /scratch/brown/fang63/CMAQ-5.2.1/data/icon/ICON_v52_160713_profile
+setenv BNDY_GASC_1 /scratch/brown/fang63/CMAQ-5.2.1/data/bcon/BCON_v52_160713_profile
+setenv BNDY_AERO_1 /scratch/brown/fang63/CMAQ-5.2.1/data/bcon/BCON_v52_160713_profile
+setenv BNDY_NONR_1 /scratch/brown/fang63/CMAQ-5.2.1/data/bcon/BCON_v52_160713_profile
+setenv BNDY_TRAC_1 /scratch/brown/fang63/CMAQ-5.2.1/data/bcon/BCON_v52_160713_profile
+setenv OMI /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/OMI_1979_to_2015.dat
+setenv OPTICS_DATA /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/PHOT_OPTICS.dat
+set TR_DVpath = /scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713
+set TR_DVfile = /scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/METCRO2D_160713.nc
+setenv gc_matrix_nml /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/GC_cb6r3_ae6_aq.nml
+setenv ae_matrix_nml /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/AE_cb6r3_ae6_aq.nml
+setenv nr_matrix_nml /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/NR_cb6r3_ae6_aq.nml
+setenv tr_matrix_nml /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/Species_Table_TR_0.nml
+setenv CSQY_DATA /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/CSQY_DATA_cb6r3_ae6_aq
+if ( ! ( -e /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/CSQY_DATA_cb6r3_ae6_aq ) ) then
+if ( ! ( -e /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/PHOT_OPTICS.dat ) ) then
+ls -l /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/CCTM_v521.exe
+-rwxr-xr-x 1 fang63 student 21223544 Jul 23 10:05 /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/CCTM_v521.exe
+size /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/CCTM_v521.exe
+   text	   data	    bss	    dec	    hex	filename
+14279864	4860700	90440236	109580800	6881200	/scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/CCTM_v521.exe
+unlimit
+limit
+cputime      unlimited
+filesize     unlimited
+datasize     unlimited
+stacksize    unlimited
+coredumpsize unlimited
+memoryuse    unlimited
+vmemoryuse   unlimited
+descriptors  20480 
+memorylocked unlimited
+maxproc      381062 
+maxlocks     unlimited
+maxsignal    381062 
+maxmessage   819200 
+maxnice      0 
+maxrtprio    0 
+maxrttime    unlimited
+date
+Tue Oct 23 04:14:49 EDT 2018
+mpirun -r ssh -np 8 /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/CCTM_v521.exe
+                                                                     
+     This program uses the EPA-AREAL/MCNC-EnvPgms/BAMS Models-3      
+     I/O Applications Programming Interface, [I/O API] which is      
+     built on top of the netCDF I/O library (Copyright 1993, 1996    
+     University Corporation for Atmospheric Research/Unidata         
+     Program) and the PVM parallel-programming library (from         
+     Oak Ridge National Laboratory).                                 
+     Copyright (C) 1992-2002 MCNC,                                   
+     (C) 1992-2013 Carlie J. Coats, Jr.,                             
+     (C) 2003-2012 Baron Advanced Meteorological Systems, LLC, and   
+     (C) 2014-2016 UNC Institute for the Environment.                
+     Released under the GNU LGPL  License, version 2.1.  See URL     
+                                                                     
+         https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html     
+                                                                     
+     for conditions of use.                                          
+                                                                     
+     ioapi-3.2: $Id: init3.F90 98 2018-04-05 14:35:07Z coats $
+     Version with PARMS3.EXT/PARAMETER::MXVARS3= 2048
+     netCDF version 4.6.1 of Jul  6 2018 10:15:36 $
+      
+      
+     EXECUTION_ID: CCTM_v521.exe
+                                                                     
+     This program uses the EPA-AREAL/MCNC-EnvPgms/BAMS Models-3      
+     I/O Applications Programming Interface, [I/O API] which is      
+     built on top of the netCDF I/O library (Copyright 1993, 1996    
+     University Corporation for Atmospheric Research/Unidata         
+     Program) and the PVM parallel-programming library (from         
+     Oak Ridge National Laboratory).                                 
+     Copyright (C) 1992-2002 MCNC,                                   
+     (C) 1992-2013 Carlie J. Coats, Jr.,                             
+     (C) 2003-2012 Baron Advanced Meteorological Systems, LLC, and   
+     (C) 2014-2016 UNC Institute for the Environment.                
+     Released under the GNU LGPL  License, version 2.1.  See URL     
+                                                                     
+         https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html     
+                                                                     
+     for conditions of use.                                          
+                                                                     
+     ioapi-3.2: $Id: init3.F90 98 2018-04-05 14:35:07Z coats $
+     netCDF version 4.6.1 of Jul  6 2018 10:15:36 $
+      
+                                                                     
+     This program uses the EPA-AREAL/MCNC-EnvPgms/BAMS Models-3      
+     I/O Applications Programming Interface, [I/O API] which is      
+     built on top of the netCDF I/O library (Copyright 1993, 1996    
+     University Corporation for Atmospheric Research/Unidata         
+     Program) and the PVM parallel-programming library (from         
+     Oak Ridge National Laboratory).                                 
+     Copyright (C) 1992-2002 MCNC,                                   
+     (C) 1992-2013 Carlie J. Coats, Jr.,                             
+     (C) 2003-2012 Baron Advanced Meteorological Systems, LLC, and   
+     (C) 2014-2016 UNC Institute for the Environment.                
+     Released under the GNU LGPL  License, version 2.1.  See URL     
+                                                                     
+         https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html     
+                                                                     
+     for conditions of use.                                          
+                                                                     
+     ioapi-3.2: $Id: init3.F90 98 2018-04-05 14:35:07Z coats $
+     netCDF version 4.6.1 of Jul  6 2018 10:15:36 $
+      
+                                                                     
+     This program uses the EPA-AREAL/MCNC-EnvPgms/BAMS Models-3      
+     I/O Applications Programming Interface, [I/O API] which is      
+     built on top of the netCDF I/O library (Copyright 1993, 1996    
+     University Corporation for Atmospheric Research/Unidata         
+     Program) and the PVM parallel-programming library (from         
+     Oak Ridge National Laboratory).                                 
+     Copyright (C) 1992-2002 MCNC,                                   
+     (C) 1992-2013 Carlie J. Coats, Jr.,                             
+     (C) 2003-2012 Baron Advanced Meteorological Systems, LLC, and   
+     (C) 2014-2016 UNC Institute for the Environment.                
+     Released under the GNU LGPL  License, version 2.1.  See URL     
+                                                                     
+         https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html     
+                                                                     
+     for conditions of use.                                          
+                                                                     
+     ioapi-3.2: $Id: init3.F90 98 2018-04-05 14:35:07Z coats $
+     netCDF version 4.6.1 of Jul  6 2018 10:15:36 $
+      
+                                                                     
+     This program uses the EPA-AREAL/MCNC-EnvPgms/BAMS Models-3      
+     I/O Applications Programming Interface, [I/O API] which is      
+     built on top of the netCDF I/O library (Copyright 1993, 1996    
+     University Corporation for Atmospheric Research/Unidata         
+     Program) and the PVM parallel-programming library (from         
+     Oak Ridge National Laboratory).                                 
+     Copyright (C) 1992-2002 MCNC,                                   
+     (C) 1992-2013 Carlie J. Coats, Jr.,                             
+     (C) 2003-2012 Baron Advanced Meteorological Systems, LLC, and   
+     (C) 2014-2016 UNC Institute for the Environment.                
+     Released under the GNU LGPL  License, version 2.1.  See URL     
+                                                                     
+         https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html     
+                                                                     
+     for conditions of use.                                          
+                                                                     
+     ioapi-3.2: $Id: init3.F90 98 2018-04-05 14:35:07Z coats $
+     netCDF version 4.6.1 of Jul  6 2018 10:15:36 $
+      
+                                                                     
+     This program uses the EPA-AREAL/MCNC-EnvPgms/BAMS Models-3      
+     I/O Applications Programming Interface, [I/O API] which is      
+     built on top of the netCDF I/O library (Copyright 1993, 1996    
+     University Corporation for Atmospheric Research/Unidata         
+     Program) and the PVM parallel-programming library (from         
+     Oak Ridge National Laboratory).                                 
+     Copyright (C) 1992-2002 MCNC,                                   
+     (C) 1992-2013 Carlie J. Coats, Jr.,                             
+     (C) 2003-2012 Baron Advanced Meteorological Systems, LLC, and   
+     (C) 2014-2016 UNC Institute for the Environment.                
+     Released under the GNU LGPL  License, version 2.1.  See URL     
+                                                                     
+         https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html     
+                                                                     
+     for conditions of use.                                          
+                                                                     
+     ioapi-3.2: $Id: init3.F90 98 2018-04-05 14:35:07Z coats $
+     netCDF version 4.6.1 of Jul  6 2018 10:15:36 $
+      
+                                                                     
+     This program uses the EPA-AREAL/MCNC-EnvPgms/BAMS Models-3      
+     I/O Applications Programming Interface, [I/O API] which is      
+     built on top of the netCDF I/O library (Copyright 1993, 1996    
+     University Corporation for Atmospheric Research/Unidata         
+     Program) and the PVM parallel-programming library (from         
+     Oak Ridge National Laboratory).                                 
+     Copyright (C) 1992-2002 MCNC,                                   
+     (C) 1992-2013 Carlie J. Coats, Jr.,                             
+     (C) 2003-2012 Baron Advanced Meteorological Systems, LLC, and   
+     (C) 2014-2016 UNC Institute for the Environment.                
+     Released under the GNU LGPL  License, version 2.1.  See URL     
+                                                                     
+         https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html     
+                                                                     
+     for conditions of use.                                          
+                                                                     
+     ioapi-3.2: $Id: init3.F90 98 2018-04-05 14:35:07Z coats $
+     netCDF version 4.6.1 of Jul  6 2018 10:15:36 $
+      
+                                                                     
+     This program uses the EPA-AREAL/MCNC-EnvPgms/BAMS Models-3      
+     I/O Applications Programming Interface, [I/O API] which is      
+     built on top of the netCDF I/O library (Copyright 1993, 1996    
+     University Corporation for Atmospheric Research/Unidata         
+     Program) and the PVM parallel-programming library (from         
+     Oak Ridge National Laboratory).                                 
+     Copyright (C) 1992-2002 MCNC,                                   
+     (C) 1992-2013 Carlie J. Coats, Jr.,                             
+     (C) 2003-2012 Baron Advanced Meteorological Systems, LLC, and   
+     (C) 2014-2016 UNC Institute for the Environment.                
+     Released under the GNU LGPL  License, version 2.1.  See URL     
+                                                                     
+         https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html     
+                                                                     
+     for conditions of use.                                          
+                                                                     
+     ioapi-3.2: $Id: init3.F90 98 2018-04-05 14:35:07Z coats $
+     netCDF version 4.6.1 of Jul  6 2018 10:15:36 $
+      
+     Value for GRID_NAME:  'SE52BENCH'
+     Value for GRID_NAME:  'SE52BENCH'
+
+     File "GRIDDESC" opened for input on unit:  99
+     /scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/GRIDDESC
+
+     Value for IOAPI_CHECK_HEADERS not defined;returning default:   FALSE
+      
+     "MET_CRO_3D" opened as OLD:READ-ONLY   
+     File name "/scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/METCRO3D_160713.nc"
+     File type GRDDED3 
+     Execution ID "mcip"
+     Grid name "METCRO_SE52BENCH"
+     Dimensions: 148 rows, 157 cols, 29 lays, 13 vbles
+     NetCDF ID:     65536  opened as READONLY            
+     Starting date and time  2016195:000000 (0:00:00   July 13, 2016)
+     Timestep                          010000 (1:00:00 hh:mm:ss)
+     Maximum current record number        49
+  
+     GC Species Namelist: 
+ /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/GC_cb6r3_ae6_
+ aq.nml
+  
+     AE Species Namelist: 
+ /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/AE_cb6r3_ae6_
+ aq.nml
+  
+     NR Species Namelist: 
+ /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/NR_cb6r3_ae6_
+ aq.nml
+  
+     TR Species Namelist: 
+ /scratch/brown/fang63/CMAQ-5.2.1/CCTM/scripts/BLD_CCTM_v521_intel/Species_Table
+ _TR_0.nml
+ 
+          -=-  MPP Processor-to-Subdomain Map  -=-
+    ____________________________________________________
+    |                                                  |
+    |  PE    #Cols    Col_Range     #Rows    Row_Range |
+    |__________________________________________________|
+    |                                                  |
+    |  0       40      1:  40         74      1:  74   |
+    |  1       39     41:  79         74      1:  74   |
+    |  2       39     80: 118         74      1:  74   |
+    |  3       39    119: 157         74      1:  74   |
+    |  4       40      1:  40         74     75: 148   |
+    |  5       39     41:  79         74     75: 148   |
+    |  6       39     80: 118         74     75: 148   |
+    |  7       39    119: 157         74     75: 148   |
+    |__________________________________________________|
+ 
+     Value for CTM_PROCAN:  N returning FALSE
+     PA_DATAGEN: Process Analysis is not activated
+     Value for CTM_WVEL:  N returning FALSE
+     Value for CTM_TSTEP:  10000
+     Value for CTM_PROGNAME not defined; returning defaultval ':  'DRIVER'
+     Value for CTM_PROGNAME not defined; returning defaultval ':  'DRIVER'
+     Main Program Name                                                               
+     Environment variable not set ... Using default:                                                         0
+     Value for CTM_STDATE:  2016195
+     Value for CTM_STTIME:  0
+     Value for CTM_RUNLEN:  240000
+      
+     "GRID_CRO_2D" opened as OLD:READ-ONLY   
+     File name "/scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/GRIDCRO2D_160713.nc"
+     File type GRDDED3 
+     Execution ID "mcip"
+     Grid name "GRIDOUT_SE52BENC"
+     Dimensions: 148 rows, 157 cols, 1 lays, 28 vbles
+     NetCDF ID:    131072  opened as READONLY            
+     Time-independent data.
+      
+     "INIT_GASC_1" opened as OLD:READ-ONLY   
+     File name "/scratch/brown/fang63/CMAQ-5.2.1/data/icon/ICON_v52_160713_profile"
+     File type GRDDED3 
+     Execution ID "ICON_v52_profile.exe"
+     Grid name "SE52BENCH"
+     Dimensions: 148 rows, 157 cols, 29 lays, 76 vbles
+     NetCDF ID:    196608  opened as READONLY            
+     Time-independent data.
+
+     IC/BC Factors used for transported gas-phase species
+       1  NO2                1.0000    
+       2  NO                 1.0000    
+     No IC found for species O in INIT_GASC_1; set to  1.00E-30
+       3  O3                 1.0000    
+       4  NO3                1.0000    
+     No IC found for species O1D in INIT_GASC_1; set to  1.00E-30
+       5  OH                 1.0000    
+       6  HO2                1.0000    
+      11  H2O2               1.0000    
+       7  N2O5               1.0000    
+       8  HNO3               1.0000    
+       9  HONO               1.0000    
+      10  PNA                1.0000    
+      32  SO2                1.0000    
+      33  SULF               1.0000    
+     No IC found for species SULRXN in INIT_GASC_1; set to  1.00E-30
+      20  C2O3               1.0000    
+     No IC found for species MEO2 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species RO2 in INIT_GASC_1; set to  1.00E-30
+      23  PAN                1.0000    
+      24  PACD               1.0000    
+      21  AACD               1.0000    
+     No IC found for species CXO3 in INIT_GASC_1; set to  1.00E-30
+      13  ALD2               1.0000    
+     No IC found for species XO2H in INIT_GASC_1; set to  1.00E-30
+      25  PANX               1.0000    
+      16  FORM               1.0000    
+      22  MEPX               1.0000    
+     No IC found for species MEOH in INIT_GASC_1; set to  1.00E-30
+      12  ROOH               1.0000    
+     No IC found for species XO2 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species XO2N in INIT_GASC_1; set to  1.00E-30
+     No IC found for species XPAR in INIT_GASC_1; set to  1.00E-30
+     No IC found for species XPRP in INIT_GASC_1; set to  1.00E-30
+     No IC found for species NTR1 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species NTR2 in INIT_GASC_1; set to  1.00E-30
+      17  FACD               1.0000    
+      18  CO                 1.0000    
+     No IC found for species HCO3 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species ALDX in INIT_GASC_1; set to  1.00E-30
+     No IC found for species GLYD in INIT_GASC_1; set to  1.00E-30
+     No IC found for species GLY in INIT_GASC_1; set to  1.00E-30
+      15  MGLY               1.0000    
+      34  ETHA               1.0000    
+     No IC found for species ETOH in INIT_GASC_1; set to  1.00E-30
+     No IC found for species KET in INIT_GASC_1; set to  1.00E-30
+      19  PAR                1.0000    
+     No IC found for species ACET in INIT_GASC_1; set to  1.00E-30
+     No IC found for species PRPA in INIT_GASC_1; set to  1.00E-30
+     No IC found for species ROR in INIT_GASC_1; set to  1.00E-30
+     No IC found for species ETHY in INIT_GASC_1; set to  1.00E-30
+      27  ETH                1.0000    
+      26  OLE                1.0000    
+      14  IOLE               1.0000    
+      31  ISOP               1.0000    
+     No IC found for species ISO2 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species ISOPRXN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species ISPD in INIT_GASC_1; set to  1.00E-30
+     No IC found for species INTR in INIT_GASC_1; set to  1.00E-30
+     No IC found for species ISPX in INIT_GASC_1; set to  1.00E-30
+     No IC found for species HPLD in INIT_GASC_1; set to  1.00E-30
+     No IC found for species OPO3 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species EPOX in INIT_GASC_1; set to  1.00E-30
+     No IC found for species EPX2 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species TERP in INIT_GASC_1; set to  1.00E-30
+     No IC found for species TRPRXN in INIT_GASC_1; set to  1.00E-30
+      35  BENZENE            1.0000    
+      29  CRES               1.0000    
+     No IC found for species BZO2 in INIT_GASC_1; set to  1.00E-30
+      30  OPEN               1.0000    
+     No IC found for species BENZRO2 in INIT_GASC_1; set to  1.00E-30
+      28  TOL                1.0000    
+     No IC found for species TO2 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species TOLRO2 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species XOPN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species XYLMN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species XLO2 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species XYLRO2 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species NAPH in INIT_GASC_1; set to  1.00E-30
+     No IC found for species PAHRO2 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species CRO in INIT_GASC_1; set to  1.00E-30
+     No IC found for species CAT1 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species CRON in INIT_GASC_1; set to  1.00E-30
+     No IC found for species OPAN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species ECH4 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species CL2 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species CL in INIT_GASC_1; set to  1.00E-30
+     No IC found for species HOCL in INIT_GASC_1; set to  1.00E-30
+     No IC found for species CLO in INIT_GASC_1; set to  1.00E-30
+     No IC found for species FMCL in INIT_GASC_1; set to  1.00E-30
+     No IC found for species HCL in INIT_GASC_1; set to  1.00E-30
+     No IC found for species CLNO2 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species TOLNRXN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species TOLHRXN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species XYLNRXN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species XYLHRXN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species BNZNRXN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species BNZHRXN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species SESQ in INIT_GASC_1; set to  1.00E-30
+     No IC found for species SESQRXN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species PAHNRXN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species PAHHRXN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species SOAALK in INIT_GASC_1; set to  1.00E-30
+     No IC found for species ALKRXN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species H2NO3PIJ in INIT_GASC_1; set to  1.00E-30
+     No IC found for species H2NO3PK in INIT_GASC_1; set to  1.00E-30
+     No IC found for species VLVPO1 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species VSVPO1 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species VSVPO2 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species VSVPO3 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species VIVPO1 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species VLVOO1 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species VLVOO2 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species VSVOO1 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species VSVOO2 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species VSVOO3 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species PCVOC in INIT_GASC_1; set to  1.00E-30
+     No IC found for species PCSOARXN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species FORM_PRIMARY in INIT_GASC_1; set to  1.00E-30
+     No IC found for species ALD2_PRIMARY in INIT_GASC_1; set to  1.00E-30
+     No IC found for species BUTADIENE13 in INIT_GASC_1; set to  1.00E-30
+     No IC found for species ACROLEIN in INIT_GASC_1; set to  1.00E-30
+     No IC found for species ACRO_PRIMARY in INIT_GASC_1; set to  1.00E-30
+     No IC found for species TOLU in INIT_GASC_1; set to  1.00E-30
+      36  HG                 1.0000    
+     No IC found for species HGIIAER in INIT_GASC_1; set to  1.00E-30
+      37  HGIIGAS            1.0000    
+
+     GC loaded into CGRID
+
+     Density*Jacobian loaded into CGRID
+      
+     "INIT_AERO_1" opened as OLD:READ-ONLY   
+     File name "/scratch/brown/fang63/CMAQ-5.2.1/data/icon/ICON_v52_160713_profile"
+     File type GRDDED3 
+     Execution ID "ICON_v52_profile.exe"
+     Grid name "SE52BENCH"
+     Dimensions: 148 rows, 157 cols, 29 lays, 76 vbles
+     NetCDF ID:    262144  opened as READONLY            
+     Time-independent data.
+
+     IC/BC Factors used for transported aerosol species
+      38  ASO4J              1.0000    
+      39  ASO4I              1.0000    
+     No IC found for species ANH4J in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ANH4I in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ANO3J in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ANO3I in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AALK1J in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AALK2J in INIT_AERO_1; set to  1.00E-30
+      40  AXYL1J             1.0000    
+      41  AXYL2J             1.0000    
+      42  AXYL3J             1.0000    
+      43  ATOL1J             1.0000    
+      44  ATOL2J             1.0000    
+      45  ATOL3J             1.0000    
+      46  ABNZ1J             1.0000    
+      47  ABNZ2J             1.0000    
+      48  ABNZ3J             1.0000    
+     No IC found for species APAH1J in INIT_AERO_1; set to  1.00E-30
+     No IC found for species APAH2J in INIT_AERO_1; set to  1.00E-30
+     No IC found for species APAH3J in INIT_AERO_1; set to  1.00E-30
+      49  ATRP1J             1.0000    
+      50  ATRP2J             1.0000    
+      51  AISO1J             1.0000    
+      52  AISO2J             1.0000    
+      53  ASQTJ              1.0000    
+     No IC found for species AORGCJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AECJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AECI in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AOTHRJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AOTHRI in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AFEJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AALJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ASIJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ATIJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ACAJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AMGJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AKJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AMNJ in INIT_AERO_1; set to  1.00E-30
+      54  ACORS              1.0000    
+      55  ASOIL              1.0000    
+      56  NUMATKN            1.0000    
+      57  NUMACC             1.0000    
+      58  NUMCOR             1.0000    
+      59  SRFATKN            1.0000    
+      60  SRFACC             1.0000    
+      61  SRFCOR             1.0000    
+     No IC found for species AH2OJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AH2OI in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AH3OPJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AH3OPI in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ANAJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ANAI in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ACLJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ACLI in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ASEACAT in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ACLK in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ASO4K in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ANH4K in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ANO3K in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AH2OK in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AH3OPK in INIT_AERO_1; set to  1.00E-30
+      62  AISO3J             1.0000    
+      63  AOLGAJ             1.0000    
+      64  AOLGBJ             1.0000    
+     No IC found for species AGLYJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species APCSOJ in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ALVPO1I in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ASVPO1I in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ASVPO2I in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ALVPO1J in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ASVPO1J in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ASVPO2J in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ASVPO3J in INIT_AERO_1; set to  1.00E-30
+     No IC found for species AIVPO1J in INIT_AERO_1; set to  1.00E-30
+     No IC found for species APOCI in INIT_AERO_1; Look for         ALVOO1I
+     No IC found for species ALVOO1I in INIT_AERO_1; set to  1.00E-30
+     No IC found for species APOCI in INIT_AERO_1; Look for         ALVOO2I
+     No IC found for species ALVOO2I in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ASVOO1I in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ASVOO2I in INIT_AERO_1; set to  1.00E-30
+     No IC found for species APOCJ in INIT_AERO_1; Look for         ALVOO1J
+     No IC found for species ALVOO1J in INIT_AERO_1; set to  1.00E-30
+     No IC found for species APOCJ in INIT_AERO_1; Look for         ALVOO2J
+     No IC found for species ALVOO2J in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ASVOO1J in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ASVOO2J in INIT_AERO_1; set to  1.00E-30
+     No IC found for species ASVOO3J in INIT_AERO_1; set to  1.00E-30
+
+     AE loaded into CGRID
+     Value for NEW_START:  TRUE returning TRUE
+
+ NOT FATAL: Optional Species APHGJ Not found in AE namelist.                    
+
+      --- Aero Species Mapped ---
+      
+     "INIT_NONR_1" opened as OLD:READ-ONLY   
+     File name "/scratch/brown/fang63/CMAQ-5.2.1/data/icon/ICON_v52_160713_profile"
+     File type GRDDED3 
+     Execution ID "ICON_v52_profile.exe"
+     Grid name "SE52BENCH"
+     Dimensions: 148 rows, 157 cols, 29 lays, 76 vbles
+     NetCDF ID:    327680  opened as READONLY            
+     Time-independent data.
+
+     IC/BC Factors used for transported non-reactive gas species
+      65  NH3                1.0000    
+     No IC found for species SV_ALK1 in INIT_NONR_1; set to  1.00E-30
+     No IC found for species SV_ALK2 in INIT_NONR_1; set to  1.00E-30
+      66  SV_XYL1            1.0000    
+      67  SV_XYL2            1.0000    
+      68  SV_TOL1            1.0000    
+      69  SV_TOL2            1.0000    
+      70  SV_BNZ1            1.0000    
+      71  SV_BNZ2            1.0000    
+     No IC found for species SV_PAH1 in INIT_NONR_1; set to  1.00E-30
+     No IC found for species SV_PAH2 in INIT_NONR_1; set to  1.00E-30
+      72  SV_TRP1            1.0000    
+      73  SV_TRP2            1.0000    
+      74  SV_ISO1            1.0000    
+      75  SV_ISO2            1.0000    
+      76  SV_SQT             1.0000    
+     No IC found for species LV_PCSOG in INIT_NONR_1; set to  1.00E-30
+
+     NR loaded into CGRID
+     CTM_CONC_1      :/scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CONC_v521_intel_160713_20160713.nc
+     
+     >>--->> WARNING in subroutine OPEN3
+     File not available.
+     
+     Could not open CTM_CONC_1 for update - try to open new
+  
+       Conc File Header Description:
+     => Concentration file output
+     => From CMAQ model dyn alloc version CTM
+     => Set of variables (possibly) reduced from CGRID
+     => For next scenario continuation runs,
+     => use the "one-step" CGRID file
+     => Layer  1 to  1
+     => Layer  2 to  2
+     => Layer  3 to  3
+     => Layer  4 to  4
+     => Layer  5 to  5
+     => Layer  6 to  6
+     => Layer  7 to  7
+     => Layer  8 to  8
+     => Layer  9 to  9
+     => Layer 10 to 10
+     => Layer 11 to 11
+     => Layer 12 to 12
+     => Layer 13 to 13
+     => Layer 14 to 14
+     => Layer 15 to 15
+     => Layer 16 to 16
+     => Layer 17 to 17
+     => Layer 18 to 18
+     => Layer 19 to 19
+     => Layer 20 to 20
+     => Layer 21 to 21
+     => Layer 22 to 22
+     => Layer 23 to 23
+     => Layer 24 to 24
+     => Layer 25 to 25
+     => Layer 26 to 26
+     => Layer 27 to 27
+     => Layer 28 to 28
+     => Layer 29 to 29
+     
+     Value for IOAPI_CHECK_HEADERS not defined;returning default:   FALSE
+     Value for IOAPI_OFFSET_64:  NO returning FALSE
+     Value for IOAPI_CFMETA not defined;returning default:   FALSE
+     Value for IOAPI_CMAQMETA not defined; returning defaultval ':  'NONE'
+     Value for IOAPI_CMAQMETA not defined; returning defaultval ':  'NONE'
+     Value for IOAPI_SMOKEMETA not defined; returning defaultval ':  'NONE'
+     Value for IOAPI_SMOKEMETA not defined; returning defaultval ':  'NONE'
+     Value for IOAPI_TEXTMETA not defined; returning defaultval ':  'NONE'
+     Value for IOAPI_TEXTMETA not defined; returning defaultval ':  'NONE'
+      
+     "CTM_CONC_1" opened as NEW(READ-WRITE )
+     File name "/scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_CONC_v521_intel_160713_20160713.nc"
+     File type GRDDED3 
+     Execution ID "CCTM_v521.exe"
+     Grid name "SE52BENCH"
+     Dimensions: 148 rows, 157 cols, 29 lays, 212 vbles
+     NetCDF ID:    393216  opened as VOLATILE READWRITE  
+     Starting date and time  2016195:000000 (0:00:00   July 13, 2016)
+     Timestep                          010000 (1:00:00 hh:mm:ss)
+     Maximum current record number         0
+  
+
+     Gas Chem species saved to CONC file:
+     Value for IOAPI_LOG_WRITE:  F returning FALSE
+     Value for IOAPI_LOG_WRITE:  F returning FALSE
+        1 (  1) NO2
+        2 (  2) NO
+        3 (  3) O
+        4 (  4) O3
+        5 (  5) NO3
+        6 (  6) O1D
+        7 (  7) OH
+        8 (  8) HO2
+        9 (  9) H2O2
+       10 ( 10) N2O5
+       11 ( 11) HNO3
+       12 ( 12) HONO
+       13 ( 13) PNA
+       14 ( 14) SO2
+       15 ( 15) SULF
+       16 ( 16) C2O3
+       17 ( 17) MEO2
+       18 ( 18) RO2
+       19 ( 19) PAN
+       20 ( 20) PACD
+       21 ( 21) AACD
+       22 ( 22) CXO3
+       23 ( 23) ALD2
+       24 ( 24) XO2H
+       25 ( 25) PANX
+       26 ( 26) FORM
+       27 ( 27) MEPX
+       28 ( 28) MEOH
+       29 ( 29) ROOH
+       30 ( 30) XO2
+       31 ( 31) XO2N
+       32 ( 32) XPAR
+       33 ( 33) XPRP
+       34 ( 34) NTR1
+       35 ( 35) NTR2
+       36 ( 36) FACD
+       37 ( 37) CO
+       38 ( 38) HCO3
+       39 ( 39) ALDX
+       40 ( 40) GLYD
+       41 ( 41) GLY
+       42 ( 42) MGLY
+       43 ( 43) ETHA
+       44 ( 44) ETOH
+       45 ( 45) KET
+       46 ( 46) PAR
+       47 ( 47) ACET
+       48 ( 48) PRPA
+       49 ( 49) ROR
+       50 ( 50) ETHY
+       51 ( 51) ETH
+       52 ( 52) OLE
+       53 ( 53) IOLE
+       54 ( 54) ISOP
+       55 ( 55) ISO2
+       56 ( 56) ISPD
+       57 ( 57) INTR
+       58 ( 58) ISPX
+       59 ( 59) HPLD
+       60 ( 60) OPO3
+       61 ( 61) EPOX
+       62 ( 62) EPX2
+       63 ( 63) TERP
+       64 ( 64) BENZENE
+       65 ( 65) CRES
+       66 ( 66) BZO2
+       67 ( 67) OPEN
+       68 ( 68) BENZRO2
+       69 ( 69) TOL
+       70 ( 70) TO2
+       71 ( 71) TOLRO2
+       72 ( 72) XOPN
+       73 ( 73) XYLMN
+       74 ( 74) XLO2
+       75 ( 75) XYLRO2
+       76 ( 76) NAPH
+       77 ( 77) PAHRO2
+       78 ( 78) CRO
+       79 ( 79) CAT1
+       80 ( 80) CRON
+       81 ( 81) OPAN
+       82 ( 82) ECH4
+       83 ( 83) CL2
+       84 ( 84) CL
+       85 ( 85) HOCL
+       86 ( 86) CLO
+       87 ( 87) FMCL
+       88 ( 88) HCL
+       89 ( 89) CLNO2
+       90 ( 90) SESQ
+       91 ( 91) SOAALK
+       92 ( 92) H2NO3PIJ
+       93 ( 93) H2NO3PK
+       94 ( 94) VLVPO1
+       95 ( 95) VSVPO1
+       96 ( 96) VSVPO2
+       97 ( 97) VSVPO3
+       98 ( 98) VIVPO1
+       99 ( 99) VLVOO1
+      100 (100) VLVOO2
+      101 (101) VSVOO1
+      102 (102) VSVOO2
+      103 (103) VSVOO3
+      104 (104) PCVOC
+      105 (105) FORM_PRIMARY
+      106 (106) ALD2_PRIMARY
+      107 (107) BUTADIENE13
+      108 (108) ACROLEIN
+      109 (109) ACRO_PRIMARY
+      110 (110) TOLU
+      111 (111) HG
+      112 (112) HGIIGAS
+
+     Aerosol species saved to CONC file:
+        1 (113) ASO4J
+        2 (114) ASO4I
+        3 (115) ANH4J
+        4 (116) ANH4I
+        5 (117) ANO3J
+        6 (118) ANO3I
+        7 (119) AALK1J
+        8 (120) AALK2J
+        9 (121) AXYL1J
+       10 (122) AXYL2J
+       11 (123) AXYL3J
+       12 (124) ATOL1J
+       13 (125) ATOL2J
+       14 (126) ATOL3J
+       15 (127) ABNZ1J
+       16 (128) ABNZ2J
+       17 (129) ABNZ3J
+       18 (130) APAH1J
+       19 (131) APAH2J
+       20 (132) APAH3J
+       21 (133) ATRP1J
+       22 (134) ATRP2J
+       23 (135) AISO1J
+       24 (136) AISO2J
+       25 (137) ASQTJ
+       26 (138) AORGCJ
+       27 (139) AECJ
+       28 (140) AECI
+       29 (141) AOTHRJ
+       30 (142) AOTHRI
+       31 (143) AFEJ
+       32 (144) AALJ
+       33 (145) ASIJ
+       34 (146) ATIJ
+       35 (147) ACAJ
+       36 (148) AMGJ
+       37 (149) AKJ
+       38 (150) AMNJ
+       39 (151) ACORS
+       40 (152) ASOIL
+       41 (153) NUMATKN
+       42 (154) NUMACC
+       43 (155) NUMCOR
+       44 (156) SRFATKN
+       45 (157) SRFACC
+       46 (158) SRFCOR
+       47 (159) AH2OJ
+       48 (160) AH2OI
+       49 (161) AH3OPJ
+       50 (162) AH3OPI
+       51 (163) ANAJ
+       52 (164) ANAI
+       53 (165) ACLJ
+       54 (166) ACLI
+       55 (167) ASEACAT
+       56 (168) ACLK
+       57 (169) ASO4K
+       58 (170) ANH4K
+       59 (171) ANO3K
+       60 (172) AH2OK
+       61 (173) AH3OPK
+       62 (174) AISO3J
+       63 (175) AOLGAJ
+       64 (176) AOLGBJ
+       65 (177) AGLYJ
+       66 (178) APCSOJ
+       67 (179) ALVPO1I
+       68 (180) ASVPO1I
+       69 (181) ASVPO2I
+       70 (182) ALVPO1J
+       71 (183) ASVPO1J
+       72 (184) ASVPO2J
+       73 (185) ASVPO3J
+       74 (186) AIVPO1J
+       75 (187) ALVOO1I
+       76 (188) ALVOO2I
+       77 (189) ASVOO1I
+       78 (190) ASVOO2I
+       79 (191) ALVOO1J
+       80 (192) ALVOO2J
+       81 (193) ASVOO1J
+       82 (194) ASVOO2J
+       83 (195) ASVOO3J
+
+     Non-reactive species saved to CONC file:
+        1 (196) NH3
+        2 (197) SV_ALK1
+        3 (198) SV_ALK2
+        4 (199) SV_XYL1
+        5 (200) SV_XYL2
+        6 (201) SV_TOL1
+        7 (202) SV_TOL2
+        8 (203) SV_BNZ1
+        9 (204) SV_BNZ2
+       10 (205) SV_PAH1
+       11 (206) SV_PAH2
+       12 (207) SV_TRP1
+       13 (208) SV_TRP2
+       14 (209) SV_ISO1
+       15 (210) SV_ISO2
+       16 (211) SV_SQT
+       17 (212) LV_PCSOG
+
+     Timestep written to CTM_CONC_1       for date and time  2016195:000000
+     from timestep on initial data files for date and time  2016195:000000
+     Value for AVG_FILE_ENDTIME:  N returning FALSE
+     A_CONC_1        :/scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_ACONC_v521_intel_160713_20160713.nc
+     
+     >>--->> WARNING in subroutine OPEN3
+     File not available.
+     
+     Could not open A_CONC_1 file for update - try to open new
+  
+       Avg Conc File Header Description:
+     => Concentration file output
+     => Averaged over the synchronization time steps
+     => Timestamp represents beginning computed date/time
+     => Layer mapping (CGRID to AGRID):
+     => Layer  1 to  1
+     => VNAME3D(  1 ): NO2             
+     => VNAME3D(  2 ): NO              
+     => VNAME3D(  3 ): O               
+     => VNAME3D(  4 ): O3              
+     => VNAME3D(  5 ): NO3             
+     => VNAME3D(  6 ): O1D             
+     => VNAME3D(  7 ): OH              
+     => VNAME3D(  8 ): HO2             
+     => VNAME3D(  9 ): H2O2            
+     => VNAME3D( 10 ): N2O5            
+     => VNAME3D( 11 ): HNO3            
+     => VNAME3D( 12 ): HONO            
+     => VNAME3D( 13 ): PNA             
+     => VNAME3D( 14 ): SO2             
+     => VNAME3D( 15 ): SULF            
+     => VNAME3D( 16 ): SULRXN          
+     => VNAME3D( 17 ): C2O3            
+     => VNAME3D( 18 ): MEO2            
+     => VNAME3D( 19 ): RO2             
+     => VNAME3D( 20 ): PAN             
+     => VNAME3D( 21 ): PACD            
+     => VNAME3D( 22 ): AACD            
+     => VNAME3D( 23 ): CXO3            
+     => VNAME3D( 24 ): ALD2            
+     => VNAME3D( 25 ): XO2H            
+     => VNAME3D( 26 ): PANX            
+     => VNAME3D( 27 ): FORM            
+     => VNAME3D( 28 ): MEPX            
+     => VNAME3D( 29 ): MEOH            
+     => VNAME3D( 30 ): ROOH            
+     => VNAME3D( 31 ): XO2             
+     => VNAME3D( 32 ): XO2N            
+     => VNAME3D( 33 ): XPAR            
+     => VNAME3D( 34 ): XPRP            
+     => VNAME3D( 35 ): NTR1            
+     => VNAME3D( 36 ): NTR2            
+     => VNAME3D( 37 ): FACD            
+     => VNAME3D( 38 ): CO              
+     => VNAME3D( 39 ): HCO3            
+     => VNAME3D( 40 ): ALDX            
+     => VNAME3D( 41 ): GLYD            
+     => VNAME3D( 42 ): GLY             
+     => VNAME3D( 43 ): MGLY            
+     => VNAME3D( 44 ): ETHA            
+     => VNAME3D( 45 ): ETOH            
+     => VNAME3D( 46 ): KET             
+     => VNAME3D( 47 ): PAR             
+     => VNAME3D( 48 ): ACET            
+     => VNAME3D( 49 ): PRPA            
+     => VNAME3D( 50 ): ROR             
+     => VNAME3D( 51 ): ETHY            
+     => VNAME3D( 52 ): ETH             
+     => VNAME3D( 53 ): OLE             
+     => VNAME3D( 54 ): IOLE            
+     => VNAME3D( 55 ): ISOP            
+     => VNAME3D( 56 ): ISO2            
+     => VNAME3D( 57 ): ISOPRXN         
+     => VNAME3D( 58 ): ISPD            
+     => VNAME3D( 59 ): INTR            
+     => VNAME3D( 60 ): ISPX            
+     => VNAME3D( 61 ): HPLD            
+     => VNAME3D( 62 ): OPO3            
+     => VNAME3D( 63 ): EPOX            
+     => VNAME3D( 64 ): EPX2            
+     => VNAME3D( 65 ): TERP            
+     => VNAME3D( 66 ): TRPRXN          
+     => VNAME3D( 67 ): BENZENE         
+     => VNAME3D( 68 ): CRES            
+     => VNAME3D( 69 ): BZO2            
+     => VNAME3D( 70 ): OPEN            
+     => VNAME3D( 71 ): BENZRO2         
+     => VNAME3D( 72 ): TOL             
+     => VNAME3D( 73 ): TO2             
+     => VNAME3D( 74 ): TOLRO2          
+     => VNAME3D( 75 ): XOPN            
+     => VNAME3D( 76 ): XYLMN           
+     => VNAME3D( 77 ): XLO2            
+     => VNAME3D( 78 ): XYLRO2          
+     => VNAME3D( 79 ): NAPH            
+     => VNAME3D( 80 ): PAHRO2          
+     => VNAME3D( 81 ): CRO             
+     => VNAME3D( 82 ): CAT1            
+     => VNAME3D( 83 ): CRON            
+     => VNAME3D( 84 ): OPAN            
+     => VNAME3D( 85 ): ECH4            
+     => VNAME3D( 86 ): CL2             
+     => VNAME3D( 87 ): CL              
+     => VNAME3D( 88 ): HOCL            
+     => VNAME3D( 89 ): CLO             
+     => VNAME3D( 90 ): FMCL            
+     => VNAME3D( 91 ): HCL             
+     => VNAME3D( 92 ): CLNO2           
+     => VNAME3D( 93 ): TOLNRXN         
+     => VNAME3D( 94 ): TOLHRXN         
+     => VNAME3D( 95 ): XYLNRXN         
+     => VNAME3D( 96 ): XYLHRXN         
+     => VNAME3D( 97 ): BNZNRXN         
+     => VNAME3D( 98 ): BNZHRXN         
+     => VNAME3D( 99 ): SESQ            
+     => VNAME3D(100 ): SESQRXN         
+     => VNAME3D(101 ): PAHNRXN         
+     => VNAME3D(102 ): PAHHRXN         
+     => VNAME3D(103 ): SOAALK          
+     => VNAME3D(104 ): ALKRXN          
+     => VNAME3D(105 ): H2NO3PIJ        
+     => VNAME3D(106 ): H2NO3PK         
+     => VNAME3D(107 ): VLVPO1          
+     => VNAME3D(108 ): VSVPO1          
+     => VNAME3D(109 ): VSVPO2          
+     => VNAME3D(110 ): VSVPO3          
+     => VNAME3D(111 ): VIVPO1          
+     => VNAME3D(112 ): VLVOO1          
+     => VNAME3D(113 ): VLVOO2          
+     => VNAME3D(114 ): VSVOO1          
+     => VNAME3D(115 ): VSVOO2          
+     => VNAME3D(116 ): VSVOO3          
+     => VNAME3D(117 ): PCVOC           
+     => VNAME3D(118 ): PCSOARXN        
+     => VNAME3D(119 ): FORM_PRIMARY    
+     => VNAME3D(120 ): ALD2_PRIMARY    
+     => VNAME3D(121 ): BUTADIENE13     
+     => VNAME3D(122 ): ACROLEIN        
+     => VNAME3D(123 ): ACRO_PRIMARY    
+     => VNAME3D(124 ): TOLU            
+     => VNAME3D(125 ): HG              
+     => VNAME3D(126 ): HGIIAER         
+     => VNAME3D(127 ): HGIIGAS         
+     => VNAME3D(128 ): ASO4J           
+     => VNAME3D(129 ): ASO4I           
+     => VNAME3D(130 ): ANH4J           
+     => VNAME3D(131 ): ANH4I           
+     => VNAME3D(132 ): ANO3J           
+     => VNAME3D(133 ): ANO3I           
+     => VNAME3D(134 ): AALK1J          
+     => VNAME3D(135 ): AALK2J          
+     => VNAME3D(136 ): AXYL1J          
+     => VNAME3D(137 ): AXYL2J          
+     => VNAME3D(138 ): AXYL3J          
+     => VNAME3D(139 ): ATOL1J          
+     => VNAME3D(140 ): ATOL2J          
+     => VNAME3D(141 ): ATOL3J          
+     => VNAME3D(142 ): ABNZ1J          
+     => VNAME3D(143 ): ABNZ2J          
+     => VNAME3D(144 ): ABNZ3J          
+     => VNAME3D(145 ): APAH1J          
+     => VNAME3D(146 ): APAH2J          
+     => VNAME3D(147 ): APAH3J          
+     => VNAME3D(148 ): ATRP1J          
+     => VNAME3D(149 ): ATRP2J          
+     => VNAME3D(150 ): AISO1J          
+     => VNAME3D(151 ): AISO2J          
+     => VNAME3D(152 ): ASQTJ           
+     => VNAME3D(153 ): AORGCJ          
+     => VNAME3D(154 ): AECJ            
+     => VNAME3D(155 ): AECI            
+     => VNAME3D(156 ): AOTHRJ          
+     => VNAME3D(157 ): AOTHRI          
+     => VNAME3D(158 ): AFEJ            
+     => VNAME3D(159 ): AALJ            
+     => VNAME3D(160 ): ASIJ            
+     => VNAME3D(161 ): ATIJ            
+     => VNAME3D(162 ): ACAJ            
+     => VNAME3D(163 ): AMGJ            
+     => VNAME3D(164 ): AKJ             
+     => VNAME3D(165 ): AMNJ            
+     => VNAME3D(166 ): ACORS           
+     => VNAME3D(167 ): ASOIL           
+     => VNAME3D(168 ): NUMATKN         
+     => VNAME3D(169 ): NUMACC          
+     => VNAME3D(170 ): NUMCOR          
+     => VNAME3D(171 ): SRFATKN         
+     => VNAME3D(172 ): SRFACC          
+     => VNAME3D(173 ): SRFCOR          
+     => VNAME3D(174 ): AH2OJ           
+     => VNAME3D(175 ): AH2OI           
+     => VNAME3D(176 ): AH3OPJ          
+     => VNAME3D(177 ): AH3OPI          
+     => VNAME3D(178 ): ANAJ            
+     => VNAME3D(179 ): ANAI            
+     => VNAME3D(180 ): ACLJ            
+     => VNAME3D(181 ): ACLI            
+     => VNAME3D(182 ): ASEACAT         
+     => VNAME3D(183 ): ACLK            
+     => VNAME3D(184 ): ASO4K           
+     => VNAME3D(185 ): ANH4K           
+     => VNAME3D(186 ): ANO3K           
+     => VNAME3D(187 ): AH2OK           
+     => VNAME3D(188 ): AH3OPK          
+     => VNAME3D(189 ): AISO3J          
+     => VNAME3D(190 ): AOLGAJ          
+     => VNAME3D(191 ): AOLGBJ          
+     => VNAME3D(192 ): AGLYJ           
+     => VNAME3D(193 ): APCSOJ          
+     => VNAME3D(194 ): ALVPO1I         
+     => VNAME3D(195 ): ASVPO1I         
+     => VNAME3D(196 ): ASVPO2I         
+     => VNAME3D(197 ): ALVPO1J         
+     => VNAME3D(198 ): ASVPO1J         
+     => VNAME3D(199 ): ASVPO2J         
+     => VNAME3D(200 ): ASVPO3J         
+     => VNAME3D(201 ): AIVPO1J         
+     => VNAME3D(202 ): ALVOO1I         
+     => VNAME3D(203 ): ALVOO2I         
+     => VNAME3D(204 ): ASVOO1I         
+     => VNAME3D(205 ): ASVOO2I         
+     => VNAME3D(206 ): ALVOO1J         
+     => VNAME3D(207 ): ALVOO2J         
+     => VNAME3D(208 ): ASVOO1J         
+     => VNAME3D(209 ): ASVOO2J         
+     => VNAME3D(210 ): ASVOO3J         
+     => VNAME3D(211 ): NH3             
+     => VNAME3D(212 ): SV_ALK1         
+     => VNAME3D(213 ): SV_ALK2         
+     => VNAME3D(214 ): SV_XYL1         
+     => VNAME3D(215 ): SV_XYL2         
+     => VNAME3D(216 ): SV_TOL1         
+     => VNAME3D(217 ): SV_TOL2         
+     => VNAME3D(218 ): SV_BNZ1         
+     => VNAME3D(219 ): SV_BNZ2         
+     => VNAME3D(220 ): SV_PAH1         
+     => VNAME3D(221 ): SV_PAH2         
+     => VNAME3D(222 ): SV_TRP1         
+     => VNAME3D(223 ): SV_TRP2         
+     => VNAME3D(224 ): SV_ISO1         
+     => VNAME3D(225 ): SV_ISO2         
+     => VNAME3D(226 ): SV_SQT          
+     => VNAME3D(227 ): LV_PCSOG        
+      
+     "A_CONC_1" opened as NEW(READ-WRITE )
+     File name "/scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_ACONC_v521_intel_160713_20160713.nc"
+     File type GRDDED3 
+     Execution ID "CCTM_v521.exe"
+     Grid name "SE52BENCH"
+     Dimensions: 148 rows, 157 cols, 1 lays, 227 vbles
+     NetCDF ID:    458752  opened as VOLATILE READWRITE  
+     Starting date and time  2016195:000000 (0:00:00   July 13, 2016)
+     Timestep                          010000 (1:00:00 hh:mm:ss)
+     Maximum current record number         0
+     Value for CLD_DIAG:  Y returning TRUE
+     CTM_WET_DEP_1   :/scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP1_v521_intel_160713_20160713.nc
+     
+     >>--->> WARNING in subroutine OPEN3
+     File not available.
+     
+     Could not open CTM_WET_DEP_1    file for update - try to open new
+      
+     "MET_CRO_2D" opened as OLD:READ-ONLY   
+     File name "/scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/METCRO2D_160713.nc"
+     File type GRDDED3 
+     Execution ID "mcip"
+     Grid name "METCRO_SE52BENCH"
+     Dimensions: 148 rows, 157 cols, 1 lays, 34 vbles
+     NetCDF ID:    524288  opened as READONLY            
+     Starting date and time  2016195:000000 (0:00:00   July 13, 2016)
+     Timestep                          010000 (1:00:00 hh:mm:ss)
+     Maximum current record number        49
+      
+     "CTM_WET_DEP_1" opened as NEW(READ-WRITE )
+     File name "/scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP1_v521_intel_160713_20160713.nc"
+     File type GRDDED3 
+     Execution ID "CCTM_v521.exe"
+     Grid name "SE52BENCH"
+     Dimensions: 148 rows, 157 cols, 1 lays, 134 vbles
+     NetCDF ID:    589824  opened as VOLATILE READWRITE  
+     Starting date and time  2016195:010000 (1:00:00   July 13, 2016)
+     Timestep                          010000 (1:00:00 hh:mm:ss)
+     Maximum current record number         0
+     CTM_WET_DEP_2   :/scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP2_v521_intel_160713_20160713.nc
+     
+     >>--->> WARNING in subroutine OPEN3
+     File not available.
+     
+     Could not open CTM_WET_DEP_2    file for update - try to open new
+      
+     "CTM_WET_DEP_2" opened as NEW(READ-WRITE )
+     File name "/scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/CCTM_WETDEP2_v521_intel_160713_20160713.nc"
+     File type GRDDED3 
+     Execution ID "CCTM_v521.exe"
+     Grid name "SE52BENCH"
+     Dimensions: 148 rows, 157 cols, 1 lays, 145 vbles
+     NetCDF ID:    655360  opened as VOLATILE READWRITE  
+     Starting date and time  2016195:010000 (1:00:00   July 13, 2016)
+     Timestep                          010000 (1:00:00 hh:mm:ss)
+     Maximum current record number         0
+ after  INITSCEN G  1.2197208E-01 A  7.0010522E+08 N  5.8119516E-05
+
+     = = = = = = = = = = = = = = Start FLCHECK = = = = = = = = = = = = = =
+
+     Value for FL_ERR_STOP:  N returning FALSE
+     Value for CTM_RUNLEN:  240000
+      
+     "GRID_DOT_2D" opened as OLD:READ-ONLY   
+     File name "/scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/GRIDDOT2D_160713.nc"
+     File type GRDDED3 
+     Execution ID "mcip"
+     Grid name "GRIDOUT_SE52BENC"
+     Dimensions: 149 rows, 158 cols, 1 lays, 9 vbles
+     NetCDF ID:    720896  opened as READONLY            
+     Time-independent data.
+     Checking header data for file: GRID_DOT_2D
+     Checking header data for file: GRID_CRO_2D
+     GRID_CRO_3D     :/scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/GRIDCRO3D_160713.nc
+     
+     >>--->> WARNING in subroutine OPEN3
+     File not available.
+     
+      
+     "GRID_BDY_2D" opened as OLD:READ-ONLY   
+     File name "/scratch/brown/fang63/CMAQ-5.2.1/data/met/mcip/160713/GRIDBDY2D_160713.nc"
+     File type BNDARY3 
+     Execution ID "mcip"
+     Grid name "GRIDOUT_SE52BENC"
+     Dimensions: 148 rows, 157 cols, 1 lays, 28 vbles, 1 cells thick
+     NetCDF ID:    786432  opened as READONLY            
+     Time-independent data.
+     Checking header data for file: GRID_BDY_2D
+NCAGTC: : NetCDF: Attribute not found
+NCAGTC: : NetCDF: Attribute not found
+NCAGTC: : NetCDF: Attribute not found
+NCAGTC: : NetCDF: Attribute not found
+NCAGTC: : NetCDF: Attribute not found
+NCAGTC: : NetCDF: Attribute not found
+NCAGTC: : NetCDF: Attribute not found
+NCAGTC: : NetCDF: Attribute not found
+14.136u 8.020s 0:03.34 663.1%	0+0k 1256+2232624io 6pf+0w
+date
+Tue Oct 23 04:14:52 EDT 2018
+if ( ! -e /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/LOGS ) then
+mv CTM_LOG_001.v521_intel_160713_20160713 CTM_LOG_002.v521_intel_160713_20160713 CTM_LOG_003.v521_intel_160713_20160713 CTM_LOG_004.v521_intel_160713_20160713 CTM_LOG_005.v521_intel_160713_20160713 CTM_LOG_006.v521_intel_160713_20160713 CTM_LOG_007.v521_intel_160713_20160713 /scratch/brown/fang63/CMAQ-5.2.1/data/output_CCTM_v521_intel_160713/LOGS
+setenv NEW_START false
+set TODAYG = `date -ud "${TODAYG}+1days" +%Y-%m-%d`
+date -ud 2016-07-13+1days +%Y-%m-%d
+set TODAYJ = `date -ud "${TODAYG}" +%Y%j`
+date -ud 2016-07-14 +%Y%j
+end
+while ( 2016196 < = 2016195 )
+exit
